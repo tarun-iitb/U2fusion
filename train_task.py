@@ -2,7 +2,8 @@ from __future__ import print_function
 
 import scipy.io as scio
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import matplotlib.pyplot as plt
 import time
 from datetime import datetime

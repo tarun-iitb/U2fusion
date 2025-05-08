@@ -1,5 +1,6 @@
 from __future__ import print_function
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import numpy as np
 from copy import deepcopy
 import matplotlib.pyplot as plt
@@ -8,13 +9,14 @@ from IPython import display
 import scipy.io as scio
 import time
 from datetime import datetime
-from scipy.misc import imsave
+from PIL import Image
+import numpy as np
 import scipy.ndimage
 from skimage import img_as_ubyte
 
 from Net import Generator
 from LOSS import SSIM_LOSS, Fro_LOSS #, L1_LOSS, Fro_LOSS
-from collections import Iterable
+from collections.abc import Iterable
 
 from VGGnet.vgg16 import Vgg16
 WEIGHT_INIT_STDDEV = 0.05
