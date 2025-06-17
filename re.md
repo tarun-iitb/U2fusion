@@ -1,6 +1,4 @@
----
 
-```markdown
 # Extended TIDE Error Analysis for Object Detection
 
 This script provides an extended pipeline for evaluating object detection models using the [TIDE](https://github.com/dbolya/tide) framework. Beyond the standard mAP breakdown, it extracts and logs **sample-wise errors** per error type (e.g., Localization, Classification, Background), and **visualizes top failure cases** with bounding boxes.
@@ -99,9 +97,3 @@ python extended_tide_analysis.py
 
 ![Example Background Error](visualize_bkg_errors.png)
 
----
-
-```
-
----
-```
