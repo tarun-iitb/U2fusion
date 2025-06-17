@@ -93,7 +93,4 @@ python extended_tide_analysis.py
 
 ---
 
-## 📷 Example Output (Visualized Error)
-
-![Example Background Error](visualize_bkg_errors.png)
 
