@@ -1,6 +1,5 @@
 
 
-````markdown
 # YOLOX-ViT: Vision Transformer Enhanced YOLOX
 
 This repository contains the modified YOLOX-ViT architecture based on the original [YOLOX](https://github.com/Megvii-BaseDetection/YOLOX), with a Vision Transformer (ViT) layer added between the backbone and neck. It is adapted from [KD-YOLOX-ViT](https://github.com/remaro-network/KD-YOLOX-ViT), designed for lightweight object detection with improved global feature extraction.
