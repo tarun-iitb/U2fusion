@@ -16,7 +16,7 @@ This repository contains the modified YOLOX-ViT architecture based on the origin
 ```bash
 git clone https://github.com/remaro-network/KD-YOLOX-ViT.git
 cd KD-YOLOX-ViT
-````
+```
 
 ---
 
