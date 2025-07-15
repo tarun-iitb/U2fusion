@@ -1,16 +1,17 @@
 
+# YOLOX-CAViT: Class-Aware Vision Transformer Enhanced YOLOX
 
-# YOLOX-ViT: Vision Transformer Enhanced YOLOX
+YOLOX-CAViT is a modified version of [YOLOX](https://github.com/Megvii-BaseDetection/YOLOX) that integrates a **Class-Aware Vision Transformer (CAViT)** between the backbone and neck. This design builds upon [KD-YOLOX-ViT](https://github.com/remaro-network/KD-YOLOX-ViT), improving detection accuracy by **emphasizing class-relevant features through class-aware attention**.
 
-This repository contains the modified YOLOX-ViT architecture based on the original [YOLOX](https://github.com/Megvii-BaseDetection/YOLOX), with a Vision Transformer (ViT) layer added between the backbone and neck. It is adapted from [KD-YOLOX-ViT](https://github.com/remaro-network/KD-YOLOX-ViT), designed for lightweight object detection with improved global feature extraction.
-
-> ✅ Running YOLOX-ViT is very similar to standard YOLOX, with just a few minor modifications.
+> 🧠 CAViT introduces class-aware attention, making it particularly useful for fine-grained or imbalanced object detection scenarios.
 
 ---
 
-## 🚀 How to Run YOLOX-ViT on DGX
+## 🚀 How to Run YOLOX-CAViT
 
-### 🔧 Step 1: Clone the Repository
+### 🔧 Step 1: Clone the Base Repository
+
+Use the original KD-YOLOX-ViT repository:
 
 ```bash
 git clone https://github.com/remaro-network/KD-YOLOX-ViT.git
@@ -19,52 +20,71 @@ cd KD-YOLOX-ViT
 
 ---
 
-### 🛠️ Step 2: Apply the Required Modifications
+### 🔁 Step 2: Replace Model Architecture Files with CAViT Versions
 
-#### 1. Create a Custom Exp File
+To activate the class-aware transformer logic:
 
-* Path: `/exps/example/custom`
-* If you're using the `yolox-l` model, copy and modify the provided `yolox_l.py` file.
-* Update the following in the file:
+1. Replace the following files from this repository:
 
-  * Dataset paths
-  * Number of epochs
-  * Number of classes
-  * Input/output settings
+   * `yolox/models/network_blocks.py` → contains the **Class-Aware Transformer Layer**
+   * `yolox/models/darknet.py` → integrates the transformer into the backbone pipeline
+   * `yolox/models/pafpn.py` → connects ViT to the FPN appropriately
 
-#### 2. Update Dataset Class Names
-
-* Path: `/yolox/data/datasets/coco_classes.py`
-* Replace the class list with your own dataset’s class names.
-
-#### 3. (Optional) Replace Evaluator File for Class-wise AP @ IoU 50
-
-* Path: `/yolox/evaluators/coco_evaluator.py`
-* Replace it with a custom version from your own YOLOX repo if you want detailed per-class AP at IoU 0.50.
-
-#### 4. Modifying the Architecture (if needed)
-
-* Path: `/yolox/models`
-* You can change or extend the model architecture here (e.g., modify ViT integration), similar to how it is done in the original YOLOX.
+These replacements **introduce class-aware attention** and retain compatibility with the rest of the YOLOX pipeline.
 
 ---
 
-### ✅ All Other Steps Are Same as YOLOX
+### ⚙️ Step 3: Create a Custom Exp File
 
-You can follow the standard YOLOX procedures for:
+1. Navigate to: `/exps/example/custom/`
+2. Copy and rename the default `yolox_l.py` or another variant you prefer.
+3. Modify:
 
-* Dataset preparation
-* Training
-* Evaluation
-* Exporting models
+   * `num_classes`: Total number of classes in your dataset
+   * `data_dir`, `train_ann`, `val_ann`: Your dataset paths
+   * `max_epoch`, `input_size`, `test_size`: Training hyperparameters
+   * `exp_name`: For uniquely identifying your experiment
 
-Refer to the original [YOLOX documentation](https://github.com/Megvii-BaseDetection/YOLOX) for complete instructions.
+> ✅ The CAViT transformer is internally initialized from this file.
 
 ---
 
-## 🧪 Example Training and Evaluation Commands
+### 🏷️ Step 4: Update Dataset Class Names
 
-### ▶️ Training Script
+Edit `/yolox/data/datasets/coco_classes.py` to include your own list of class names.
+
+---
+
+### 🔍 Optional: Replace Evaluator for Class-wise AP @ IoU 50
+
+To analyze **per-class AP at IoU=0.50**, you may replace `/yolox/evaluators/coco_evaluator.py` with a custom evaluator supporting class-wise breakdowns.
+
+---
+
+## 🧠 CAViT Architectural Highlights
+
+**Class-Aware Vision Transformer (CAViT)** modifies the transformer block with:
+
+* 🔁 **Class-Specific Attention Modulation**
+  Learns `class_weights` and uses a projection layer (`class_proj`) to compute spatial class attention.
+
+* 🧮 **Weighted Class Attention**
+  Focuses attention on regions likely belonging to specific classes.
+
+* 🧩 **Class-Aware Bias Modulation**
+  Adjusts attention output using class-specific cues to improve discrimination.
+
+* 🧼 **Pre-Normalization**
+  Applies layer normalization before MHSA and FFN for stable learning.
+
+* 🧪 **Dropout Regularization**
+  Helps reduce overfitting—especially beneficial in class-imbalanced datasets.
+
+---
+
+## 🧪 Training and Evaluation
+
+### ▶️ Training
 
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/mnt/Users/tarun_kumar_/KD-YOLOX-ViT" && \
@@ -72,7 +92,7 @@ python3 tools/train.py -f exps/example/custom/yolox_l.py -d 1 -b 1 --fp16 -o \
 -c /mnt/Users/tarun_kumar_/KD-YOLOX-ViT/yolox_l.pth
 ```
 
-### 📈 Evaluation Script
+### 📈 Evaluation
 
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/mnt/Users/tarun_kumar_/KD-YOLOX-ViT" && \
@@ -84,15 +104,16 @@ python3 tools/eval.py -n yolox-l -c /mnt/Users/tarun_kumar_/KD-YOLOX-ViT/YOLOX_o
 
 ## 📌 Notes
 
-* The ViT module is inserted between the SPP bottleneck and the neck in the YOLOX architecture.
 * No knowledge distillation is applied unless added manually.
-* The repo supports both offline and online training approaches as described in the paper.
+* Class weights can optionally be initialized using your dataset’s class distribution.
+* The CAViT module replaces the original ViT used in YOLOX-ViT.
+* All training, evaluation, and export steps remain the same as standard YOLOX.
 
 ---
 
 ## 📄 Citation
 
-If you use this codebase, please consider citing the following:
+If you use this architecture or code, please consider citing the following:
 
 ```
 Aubard, M., Antal, L., Madureira, A., & Ábrahám, E. (2024). Knowledge Distillation in YOLOX-ViT for Side-Scan Sonar Object Detection. REMARO Workshop, ETAPS 2024.
@@ -102,9 +123,6 @@ Aubard, M., Antal, L., Madureira, A., & Ábrahám, E. (2024). Knowledge Distilla
 
 ## 🔗 Related Repositories
 
-* Original KD-YOLOX-ViT: [https://github.com/remaro-network/KD-YOLOX-ViT](https://github.com/remaro-network/KD-YOLOX-ViT)
+* KD-YOLOX-ViT: [https://github.com/remaro-network/KD-YOLOX-ViT](https://github.com/remaro-network/KD-YOLOX-ViT)
 * YOLOX: [https://github.com/Megvii-BaseDetection/YOLOX](https://github.com/Megvii-BaseDetection/YOLOX)
 
-
-```
-```
